@@ -18,28 +18,45 @@ const queryClient = new QueryClient({
   },
 });
 
-// Initialize dispatch API
-// TODO: Wire this up properly through UgProvider context
-// For now, using a placeholder token getter
+// Dev mode: point to localhost API
+const isDev = import.meta.env.DEV;
+const apiUrl = isDev ? 'http://localhost:3001' : 'https://api.theuniversalgroup.ca';
+
+// Initialize dispatch API to use token from window.ugAuth (set up by UgProvider)
 const dispatchApi = createDispatchApi({
-  baseUrl: window.ugConfig?.apiUrl || 'https://api.theuniversalgroup.ca',
+  baseUrl: apiUrl,
   getToken: async () => {
-    // TODO: Get token from window.ugAuth or UgProvider
-    return window.ugAuth?.getToken() || '';
+    return (window as any).ugAuth?.getToken() || '';
   },
 });
 
 setDispatchApi(dispatchApi);
 
+// Auth config for local development
+// In production, this would be loaded from S3 components.json
+const config = isDev ? {
+  auth: {
+    tokenEndpoint: 'http://localhost:3001/auth/token',
+    groupsEndpoint: 'http://localhost:3001/auth/groups',
+    // Google OAuth client ID - needs to be configured
+    // For now, user must sign in via ug-ui-react first at localhost:3000
+    clientId: '891628046187-1vgu88vlkqrrhkshd88r74kq1lnva4aq.apps.googleusercontent.com',
+    hostedDomain: 'theuniversalgroup.ca',
+  },
+  'ug-ep-dispatch-atc': {
+    components: ['auth'],
+  },
+} : {
+  auth: {}, // Production config comes from S3
+  'ug-ep-dispatch-atc': {
+    components: ['auth'],
+  },
+};
+
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <QueryClientProvider client={queryClient}>
-      <UgProvider
-        config={{
-          apiUrl: 'https://api.theuniversalgroup.ca',
-          authUrl: 'https://api.theuniversalgroup.ca/auth',
-        }}
-      >
+      <UgProvider app="ug-ep-dispatch-atc" config={config}>
         <App />
       </UgProvider>
     </QueryClientProvider>
