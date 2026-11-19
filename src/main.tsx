@@ -5,8 +5,8 @@ import { UgProvider, createDispatchApi, setDispatchApi } from '@the-universal-gr
 import App from './App';
 import './index.css';
 
-// Import ug-ui styles (includes ant.d theming)
-import '@the-universal-group/ui/dist/index.css';
+// Import ant.d styles
+import 'antd/dist/reset.css';
 
 // Create React Query client
 const queryClient = new QueryClient({
