@@ -6,7 +6,7 @@ COPY package*.json .npmrc ./
 
 # Install dependencies
 ARG NODE_AUTH_TOKEN
-RUN npm ci
+RUN npm install
 
 # Copy source
 COPY . .
